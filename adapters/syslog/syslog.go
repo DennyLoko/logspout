@@ -96,6 +96,8 @@ func NewSyslogAdapter(route *router.Route) (router.LogAdapter, error) {
 		structuredData = fmt.Sprintf("[%s]", structuredData)
 	}
 
+	datadogAPIKey := getopt("DATADOG_API_KEY", "")
+
 	var tmplStr string
 	switch format {
 	case "rfc5424":
@@ -104,6 +106,9 @@ func NewSyslogAdapter(route *router.Route) (router.LogAdapter, error) {
 	case "rfc3164":
 		tmplStr = fmt.Sprintf("<%s>%s %s %s[%s]: %s\n",
 			priority, timestamp, hostname, tag, pid, data)
+	case "datadog":
+		tmplStr = fmt.Sprintf("%s <%s>1 %s %s %s %s - %s %s\n",
+			datadogAPIKey, priority, timestamp, hostname, tag, pid, structuredData, data)
 	default:
 		return nil, errors.New("unsupported syslog format: " + format)
 	}
